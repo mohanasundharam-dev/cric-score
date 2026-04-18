@@ -159,6 +159,10 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
     </svg>
   </div>
   <h1>Cricket Scorer</h1>
+  <button onclick="openAdminModal()" 
+    style="margin-left:auto;background:#fff;color:#0F6E56;border:none;padding:6px 10px;border-radius:6px;font-weight:600;cursor:pointer">
+    🔐 Admin
+  </button>
   <div class="innings-pill" id="inningsPill">1st Innings</div>
 </div>
 
@@ -261,6 +265,22 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
     <select id="newBowlerSelect" style="flex:1;min-width:0;padding:7px 10px;font-size:13px;border:1.5px solid #C0DD97;border-radius:var(--radius-sm);background:#fff"><option value="">Choose player</option></select>
     <button class="btn btn-green" onclick="setNewBowler()">Bowl</button>
   </div>
+  <div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <h2>Admin Login</h2>
+
+    <input type="password" id="adminPass" placeholder="Enter password"
+      style="width:100%;padding:10px;margin-top:10px;border:1px solid #ccc;border-radius:6px">
+
+    <button class="btn btn-green btn-full" style="margin-top:12px" onclick="adminLoginSubmit()">
+      Login
+    </button>
+
+    <button class="btn btn-full" style="margin-top:6px" onclick="closeAdminModal()">
+      Cancel
+    </button>
+  </div>
+</div>
 
   <div id="scoringArea">
     <!-- Run buttons with colour coding matching ball dots -->
@@ -543,6 +563,121 @@ function loadFullScoreboard(){
 }
 
 function switchTab(name){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-btn')[{setup:0,live:1,scoreboard:2}[name]].classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');if(name==='scoreboard')loadFullScoreboard();if(name==='live'&&getInnings())refreshLiveUI();}
+
+// ==============================
+// AUTO SAVE + LOAD (FINAL SETUP)
+// ==============================
+
+// 🔹 Load state
+(function loadState() {
+  const saved = localStorage.getItem("cricketAppState");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    Object.assign(state, parsed);
+
+    // Fix Set issue
+    if (state.innings) {
+      Object.keys(state.innings).forEach(matchId => {
+        state.innings[matchId].forEach(inn => {
+          if (inn && inn.outPlayers) {
+            inn.outPlayers = new Set(inn.outPlayers);
+          }
+        });
+      });
+    }
+  }
+})();
+
+// 🔹 Save state (auto)
+function saveState() {
+  localStorage.setItem("cricketAppState", JSON.stringify(state));
+}
+
+// 🔹 Auto-save whenever state changes (PRO WAY)
+const originalState = JSON.stringify(state);
+
+setInterval(() => {
+  if (JSON.stringify(state) !== originalState) {
+    saveState();
+  }
+}, 1000); // every 1 sec
+
+// 🔹 Initial UI refresh
+refreshSetupUI();
+
+if (state.currentMatchId) {
+  refreshLiveUI();
+}
+
+// 🔹 Optional: Clear button support
+function clearAllData() {
+  localStorage.removeItem("cricketAppState");
+  location.reload();
+}
+// ==============================
+// ADMIN LOGIN SYSTEM (UI BASED)
+// ==============================
+
+const ADMIN_PASSWORD = "mohan123"; // 🔥 change this
+
+function openAdminModal() {
+  document.getElementById("adminModal").classList.add("show");
+}
+
+function closeAdminModal() {
+  document.getElementById("adminModal").classList.remove("show");
+}
+
+function adminLoginSubmit() {
+  const pass = document.getElementById("adminPass").value;
+
+  if (pass === ADMIN_PASSWORD) {
+    localStorage.setItem("isAdmin", "true");
+    alert("Admin login success");
+    location.reload();
+  } else {
+    alert("Wrong password");
+  }
+}
+
+// 🔐 Check admin
+const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+// 🔓 Logout
+function adminLogout() {
+  localStorage.removeItem("isAdmin");
+  location.reload();
+}
+
+// 🎯 Restrict UI
+function applyRoleControl() {
+
+  if (!isAdmin) {
+    // Hide setup tab
+    document.querySelectorAll('.tab-btn')[0].style.display = "none";
+
+    // Hide scoring
+    const scoring = document.getElementById("scoringArea");
+    if (scoring) scoring.style.display = "none";
+
+    // Force live view
+    switchTab('live');
+
+  } else {
+    // Add logout button
+    const btn = document.createElement("button");
+    btn.innerText = "Logout";
+    btn.onclick = adminLogout;
+    btn.style = "margin-left:10px;background:#E24B4A;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer";
+
+    document.querySelector(".app-header").appendChild(btn);
+  }
+}
+
+// Run it
+applyRoleControl();
+
+
 </script>
 </body>
 </html>

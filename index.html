@@ -543,58 +543,6 @@ function loadFullScoreboard(){
 }
 
 function switchTab(name){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-btn')[{setup:0,live:1,scoreboard:2}[name]].classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');if(name==='scoreboard')loadFullScoreboard();if(name==='live'&&getInnings())refreshLiveUI();}
-
-// ==============================
-// AUTO SAVE + LOAD (FINAL SETUP)
-// ==============================
-
-// 🔹 Load state
-(function loadState() {
-  const saved = localStorage.getItem("cricketAppState");
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    Object.assign(state, parsed);
-
-    // Fix Set issue
-    if (state.innings) {
-      Object.keys(state.innings).forEach(matchId => {
-        state.innings[matchId].forEach(inn => {
-          if (inn && inn.outPlayers) {
-            inn.outPlayers = new Set(inn.outPlayers);
-          }
-        });
-      });
-    }
-  }
-})();
-
-// 🔹 Save state (auto)
-function saveState() {
-  localStorage.setItem("cricketAppState", JSON.stringify(state));
-}
-
-// 🔹 Auto-save whenever state changes (PRO WAY)
-const originalState = JSON.stringify(state);
-
-setInterval(() => {
-  if (JSON.stringify(state) !== originalState) {
-    saveState();
-  }
-}, 1000); // every 1 sec
-
-// 🔹 Initial UI refresh
-refreshSetupUI();
-
-if (state.currentMatchId) {
-  refreshLiveUI();
-}
-
-// 🔹 Optional: Clear button support
-function clearAllData() {
-  localStorage.removeItem("cricketAppState");
-  location.reload();
-}
-
 </script>
 </body>
 </html>

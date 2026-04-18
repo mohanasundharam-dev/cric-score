@@ -417,15 +417,30 @@ const teamPlayers = (tid) => state.players.filter(p => p.teamId === tid);
 // 🔥 HELPER: Convert Set → Array (for Firebase serialization)
 // ==============================
 function convertSets(obj) {
+
   if (!obj) return obj;
+
   const newObj = JSON.parse(JSON.stringify(obj));
+
   Object.keys(newObj).forEach(mid => {
-    newObj[mid].forEach(inn => {
-      if (inn && inn.outPlayers) {
+
+    const matchInnings = newObj[mid];
+
+    // 🔥 CRITICAL FIX
+    if (!matchInnings || !Array.isArray(matchInnings)) return;
+
+    matchInnings.forEach(inn => {
+
+      if (!inn) return; // 🔥 FIX NULL innings
+
+      if (inn.outPlayers) {
         inn.outPlayers = Array.from(inn.outPlayers);
       }
+
     });
+
   });
+
   return newObj;
 }
 

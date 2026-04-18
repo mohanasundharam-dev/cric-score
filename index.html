@@ -362,9 +362,6 @@ input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0
 // ==============================
 // 🔥 FIREBASE IMPORTS
 // ==============================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js";
-
 // ==============================
 // 🔥 FIREBASE CONFIG
 // ==============================
@@ -729,8 +726,16 @@ function applyRoleControl() {
   }
 }
 
-// Run it
-applyRoleControl();
+window.onload = () => {
+  applyRoleControl();
+};
+  const adminBtn = document.querySelector("button[onclick='openAdminModal()']");
+
+if (!isAdmin) {
+  if (adminBtn) adminBtn.style.display = "block";
+} else {
+  if (adminBtn) adminBtn.style.display = "none";
+}
 
 
 </script>

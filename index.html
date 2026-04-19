@@ -959,7 +959,7 @@ function refreshLiveUI(){
   if(IS_ADMIN)refreshRetireSelects();
   // ✅ Spectator end card
   const ec=document.getElementById('spectatorEndCard');
-  if(ec)ec.style.display=(state.matchComplete&&!IS_ADMIN)?'block':'none';
+  // if(ec)ec.style.display=(state.matchComplete&&!IS_ADMIN)?'block':'none';
   // Undo btn
   updateUndoBtn(inn);
 }
